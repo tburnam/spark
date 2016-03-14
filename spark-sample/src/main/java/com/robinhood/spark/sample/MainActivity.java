@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class RandomizedAdapter extends SparkAdapter {
-        private float[] yData;
-        private Random random;
+        private final float[] yData;
+        private final Random random;
 
         public RandomizedAdapter() {
             random = new Random();

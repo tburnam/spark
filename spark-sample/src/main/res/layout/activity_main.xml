@@ -16,7 +16,6 @@
         android:id="@+id/sparkline"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-
         app:spark_lineColor="@color/colorAccent"
         app:spark_scrubEnabled="true"
         app:spark_animate="true"/>

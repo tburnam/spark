@@ -33,7 +33,7 @@ abstract class ScrubGestureDetector implements View.OnTouchListener {
     private boolean enabled;
     private long initialTouchTime;
     private float downX, downY;
-    private float touchSlop;
+    private final float touchSlop;
 
     public ScrubGestureDetector(Context context) {
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();

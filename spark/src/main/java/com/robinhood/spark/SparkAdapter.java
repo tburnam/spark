@@ -21,11 +21,11 @@ import android.database.DataSetObserver;
 
 /**
  * A simple adapter class - evenly distributes your points along the x axis, does not
- * draw a baseline, and has support for registering/notifying {@link DataSetObserver}s when
+ * draw a base line, and has support for registering/notifying {@link DataSetObserver}s when
  * data is changed.
  */
 public abstract class SparkAdapter {
-    private DataSetObservable observable = new DataSetObservable();
+    private final DataSetObservable observable = new DataSetObservable();
 
     /**
      * returns the number of points to be drawn

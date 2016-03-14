@@ -52,7 +52,7 @@ public class Sparkline extends View {
     private boolean scrubEnabled;
     private boolean animateChanges;
 
-    // the normalized data
+    // the onDraw data
     private final Path renderPath = new Path();
     private final Path path = new Path();
     private final Path baseLinePath = new Path();
@@ -69,7 +69,7 @@ public class Sparkline extends View {
     private ScrubGestureDetector scrubGestureDetector;
     private List<Float> xPoints;
     private ValueAnimator pathAnimator;
-    private RectF contentRect = new RectF();
+    private final RectF contentRect = new RectF();
 
     private static int shortAnimationTime;
 
@@ -210,7 +210,7 @@ public class Sparkline extends View {
             path.close();
         }
 
-        // make our baseline path
+        // make our base line path
         baseLinePath.reset();
         if (adapter.hasBaseLine()) {
             float scaledBaseLine = scaleHelper.getY(adapter.getBaseLine());
@@ -307,7 +307,7 @@ public class Sparkline extends View {
     }
 
     /**
-     * Whether or not this voiew should animate changes to its data.
+     * Whether or not this view should animate changes to its data.
      */
     public void setAnimateChanges(boolean animate) {
         this.animateChanges = animate;
@@ -368,14 +368,14 @@ public class Sparkline extends View {
     }
 
     /**
-     * Get the color of the baseline
+     * Get the color of the base line
      */
     @ColorInt public int getBaseLineColor() {
         return baseLineColor;
     }
 
     /**
-     * Set the color of the baseline
+     * Set the color of the base line
      */
     public void setBaseLineColor(@ColorInt int baseLineColor) {
         this.baseLineColor = baseLineColor;
@@ -384,14 +384,14 @@ public class Sparkline extends View {
     }
 
     /**
-     * Get the width in pixels of the baseline's stroke
+     * Get the width in pixels of the base line's stroke
      */
     public float getBaseLineWidth() {
         return baseLineWidth;
     }
 
     /**
-     * Set the width in pixels of the baseline's stroke
+     * Set the width in pixels of the base line's stroke
      */
     public void setBaseLineWidth(float baseLineWidth) {
         this.baseLineWidth = baseLineWidth;
@@ -400,7 +400,7 @@ public class Sparkline extends View {
     }
 
     /**
-     * Get the {@link Paint} used to draw the baseline. Any modifications to this {@link Paint}
+     * Get the {@link Paint} used to draw the base line. Any modifications to this {@link Paint}
      * will not reflect until the next call to {@link #invalidate()}
      */
     public Paint getBaseLinePaint() {
@@ -408,7 +408,7 @@ public class Sparkline extends View {
     }
 
     /**
-     * Set the {@link Paint} to be used to draw the baseline. Warning: setting a paint other than
+     * Set the {@link Paint} to be used to draw the base line. Warning: setting a paint other than
      * the instance returned by {@link #getBaseLinePaint()} ()} may result in loss of style
      * attributes specified on this view.
      */
@@ -497,9 +497,10 @@ public class Sparkline extends View {
         if (this.adapter != null) {
             adapter.registerDataSetObserver(dataSetObserver);
         }
+        populatePath();
     }
 
-    private void doPathAnimation(float newToOldLengthRatio) {
+    private void doPathAnimation() {
         if (pathAnimator != null) {
             pathAnimator.cancel();
         }
@@ -513,8 +514,7 @@ public class Sparkline extends View {
         float endLength = pathMeasure.getLength();
         if (endLength == 0) return;
 
-        float start = endLength * newToOldLengthRatio * 0;
-        pathAnimator = ValueAnimator.ofFloat(start, endLength);
+        pathAnimator = ValueAnimator.ofFloat(0, endLength);
         pathAnimator.setDuration(shortAnimationTime);
         pathAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -523,7 +523,6 @@ public class Sparkline extends View {
                 renderPath.reset();
                 pathMeasure.getSegment(0, animatedPathLength, renderPath, true);
                 renderPath.rLineTo(0, 0);
-
                 invalidate();
             }
         });
@@ -666,20 +665,13 @@ public class Sparkline extends View {
     }
 
     private final DataSetObserver dataSetObserver = new DataSetObserver() {
-        int oldCount;
-
         @Override
         public void onChanged() {
             super.onChanged();
-            // detect when we're adding points and animate using path tracing:
-            int newCount = adapter.getCount();
-            boolean addingPoints = oldCount < newCount;
-            float newToOldLengthRatio = (float) oldCount / (float) newCount;
-
             populatePath();
 
-            if (animateChanges && addingPoints) {
-                doPathAnimation(newToOldLengthRatio);
+            if (animateChanges) {
+                doPathAnimation();
             }
         }
 
