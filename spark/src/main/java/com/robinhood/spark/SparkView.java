@@ -37,9 +37,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A Sparkline is a simplified line chart with no axes.
+ * A {@link SparkView} is a simplified line chart with no axes.
  */
-public class Sparkline extends View {
+public class SparkView extends View {
     // styleable values
     @ColorInt private int lineColor;
     private float lineWidth;
@@ -54,7 +54,7 @@ public class Sparkline extends View {
 
     // the onDraw data
     private final Path renderPath = new Path();
-    private final Path path = new Path();
+    private final Path sparkPath = new Path();
     private final Path baseLinePath = new Path();
     private final Path scrubLinePath = new Path();
 
@@ -62,7 +62,7 @@ public class Sparkline extends View {
     private SparkAdapter adapter;
 
     // misc fields
-    private Paint sparklinePaint;
+    private Paint sparkLinePaint;
     private Paint baseLinePaint;
     private Paint scrubLinePaint;
     private OnScrubListener scrubListener;
@@ -73,49 +73,49 @@ public class Sparkline extends View {
 
     private static int shortAnimationTime;
 
-    public Sparkline(Context context) {
+    public SparkView(Context context) {
         super(context);
-        init(context, null, R.attr.spark_SparklineStyle, R.style.spark_Sparkline);
+        init(context, null, R.attr.spark_SparkViewStyle, R.style.spark_SparkView);
     }
 
-    public Sparkline(Context context, AttributeSet attrs) {
+    public SparkView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs, R.attr.spark_SparklineStyle, R.style.spark_Sparkline);
+        init(context, attrs, R.attr.spark_SparkViewStyle, R.style.spark_SparkView);
     }
 
-    public Sparkline(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SparkView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs, defStyleAttr, R.style.spark_Sparkline);
+        init(context, attrs, defStyleAttr, R.style.spark_SparkView);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public Sparkline(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public SparkView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.spark_Sparkline,
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.spark_SparkView,
                 defStyleAttr, defStyleRes);
-        lineColor = a.getColor(R.styleable.spark_Sparkline_spark_lineColor, 0);
-        lineWidth = a.getDimension(R.styleable.spark_Sparkline_spark_lineWidth, 0);
-        cornerRadius = a.getDimension(R.styleable.spark_Sparkline_spark_cornerRadius, 0);
-        fill = a.getBoolean(R.styleable.spark_Sparkline_spark_fill, false);
-        baseLineColor = a.getColor(R.styleable.spark_Sparkline_spark_baseLineColor, 0);
-        baseLineWidth = a.getDimension(R.styleable.spark_Sparkline_spark_baseLineWidth, 0);
-        scrubEnabled = a.getBoolean(R.styleable.spark_Sparkline_spark_scrubEnabled, true);
-        scrubLineColor = a.getColor(R.styleable.spark_Sparkline_spark_scrubLineColor, baseLineColor);
-        scrubLineWidth = a.getDimension(R.styleable.spark_Sparkline_spark_scrubLineWidth, lineWidth);
-        animateChanges = a.getBoolean(R.styleable.spark_Sparkline_spark_animate, false);
+        lineColor = a.getColor(R.styleable.spark_SparkView_spark_lineColor, 0);
+        lineWidth = a.getDimension(R.styleable.spark_SparkView_spark_lineWidth, 0);
+        cornerRadius = a.getDimension(R.styleable.spark_SparkView_spark_cornerRadius, 0);
+        fill = a.getBoolean(R.styleable.spark_SparkView_spark_fill, false);
+        baseLineColor = a.getColor(R.styleable.spark_SparkView_spark_baseLineColor, 0);
+        baseLineWidth = a.getDimension(R.styleable.spark_SparkView_spark_baseLineWidth, 0);
+        scrubEnabled = a.getBoolean(R.styleable.spark_SparkView_spark_scrubEnabled, true);
+        scrubLineColor = a.getColor(R.styleable.spark_SparkView_spark_scrubLineColor, baseLineColor);
+        scrubLineWidth = a.getDimension(R.styleable.spark_SparkView_spark_scrubLineWidth, lineWidth);
+        animateChanges = a.getBoolean(R.styleable.spark_SparkView_spark_animateChanges, false);
         a.recycle();
 
-        sparklinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        sparklinePaint.setColor(lineColor);
-        sparklinePaint.setStrokeWidth(lineWidth);
-        sparklinePaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
-        sparklinePaint.setStrokeCap(Paint.Cap.ROUND);
+        sparkLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        sparkLinePaint.setColor(lineColor);
+        sparkLinePaint.setStrokeWidth(lineWidth);
+        sparkLinePaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
+        sparkLinePaint.setStrokeCap(Paint.Cap.ROUND);
         if (cornerRadius != 0) {
-            sparklinePaint.setPathEffect(new CornerPathEffect(cornerRadius));
+            sparkLinePaint.setPathEffect(new CornerPathEffect(cornerRadius));
         }
 
         baseLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -163,7 +163,7 @@ public class Sparkline extends View {
     }
 
     /**
-     * Populates the {@linkplain #path} with points
+     * Populates the {@linkplain #sparkPath} with points
      */
     private void populatePath() {
         if (adapter == null) return;
@@ -182,15 +182,15 @@ public class Sparkline extends View {
         }
 
         // make our main graph path
-        path.reset();
+        sparkPath.reset();
         for (int i = 0; i < adapterCount; i++) {
             final float x = scaleHelper.getX(adapter.getX(i));
             final float y = scaleHelper.getY(adapter.getY(i));
 
             if (i == 0) {
-                path.moveTo(x, y);
+                sparkPath.moveTo(x, y);
             } else {
-                path.lineTo(x, y);
+                sparkPath.lineTo(x, y);
             }
 
             if (scrubEnabled) {
@@ -203,11 +203,11 @@ public class Sparkline extends View {
             float lastX = scaleHelper.getX(adapter.getCount() - 1);
             float bottom = getHeight() - getPaddingBottom();
             // line straight down to the bottom of the view
-            path.lineTo(lastX, bottom);
+            sparkPath.lineTo(lastX, bottom);
             // line straight left to far edge of the view
-            path.lineTo(0, bottom);
+            sparkPath.lineTo(0, bottom);
             // line straight up to meet the first point
-            path.close();
+            sparkPath.close();
         }
 
         // make our base line path
@@ -219,7 +219,7 @@ public class Sparkline extends View {
         }
 
         renderPath.reset();
-        renderPath.addPath(path);
+        renderPath.addPath(sparkPath);
 
         invalidate();
     }
@@ -242,7 +242,7 @@ public class Sparkline extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawPath(baseLinePath, baseLinePaint);
-        canvas.drawPath(renderPath, sparklinePaint);
+        canvas.drawPath(renderPath, sparkLinePaint);
         canvas.drawPath(scrubLinePath, scrubLinePaint);
     }
 
@@ -258,7 +258,7 @@ public class Sparkline extends View {
      */
     public void setLineColor(@ColorInt int lineColor) {
         this.lineColor = lineColor;
-        sparklinePaint.setColor(lineColor);
+        sparkLinePaint.setColor(lineColor);
         invalidate();
     }
 
@@ -274,7 +274,7 @@ public class Sparkline extends View {
      */
     public void setLineWidth(float lineWidth) {
         this.lineWidth = lineWidth;
-        sparklinePaint.setStrokeWidth(lineWidth);
+        sparkLinePaint.setStrokeWidth(lineWidth);
         invalidate();
     }
 
@@ -292,9 +292,9 @@ public class Sparkline extends View {
     public void setCornerRadius(float cornerRadius) {
         this.cornerRadius = cornerRadius;
         if (cornerRadius != 0) {
-            sparklinePaint.setPathEffect(new CornerPathEffect(cornerRadius));
+            sparkLinePaint.setPathEffect(new CornerPathEffect(cornerRadius));
         } else {
-            sparklinePaint.setPathEffect(null);
+            sparkLinePaint.setPathEffect(null);
         }
         invalidate();
     }
@@ -344,7 +344,7 @@ public class Sparkline extends View {
     public void setFill(boolean fill) {
         if (this.fill != fill) {
             this.fill = fill;
-            sparklinePaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
+            sparkLinePaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
             populatePath();
         }
     }
@@ -353,17 +353,17 @@ public class Sparkline extends View {
      * Get the {@link Paint} used to draw the sparkline. Any modifications to this {@link Paint}
      * will not reflect until the next call to {@link #invalidate()}
      */
-    public Paint getSparklinePaint() {
-        return sparklinePaint;
+    public Paint getSparkLinePaint() {
+        return sparkLinePaint;
     }
 
     /**
      * Set the {@link Paint} to be used to draw the sparkline. Warning: setting a paint other than
-     * the instance returned by {@link #getSparklinePaint()} may result in loss of style attributes
+     * the instance returned by {@link #getSparkLinePaint()} may result in loss of style attributes
      * specified on this view.
      */
-    public void setSparklinePaint(Paint pathPaint) {
-        this.sparklinePaint = pathPaint;
+    public void setSparkLinePaint(Paint pathPaint) {
+        this.sparkLinePaint = pathPaint;
         invalidate();
     }
 
@@ -509,7 +509,7 @@ public class Sparkline extends View {
             shortAnimationTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
         }
 
-        final PathMeasure pathMeasure = new PathMeasure(path, false);
+        final PathMeasure pathMeasure = new PathMeasure(sparkPath, false);
 
         float endLength = pathMeasure.getLength();
         if (endLength == 0) return;
@@ -679,7 +679,7 @@ public class Sparkline extends View {
         public void onInvalidated() {
             super.onInvalidated();
             renderPath.reset();
-            path.reset();
+            sparkPath.reset();
             baseLinePath.reset();
             invalidate();
         }

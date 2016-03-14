@@ -22,7 +22,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.robinhood.spark.SparkAdapter;
-import com.robinhood.spark.Sparkline;
+import com.robinhood.spark.SparkView;
 
 import java.util.Random;
 
@@ -35,11 +35,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Sparkline sparkline = (Sparkline) findViewById(R.id.sparkline);
+        SparkView sparkView = (SparkView) findViewById(R.id.sparkview);
 
         adapter = new RandomizedAdapter();
-        sparkline.setAdapter(adapter);
-        sparkline.setScrubListener(new Sparkline.OnScrubListener() {
+        sparkView.setAdapter(adapter);
+        sparkView.setScrubListener(new SparkView.OnScrubListener() {
             @Override
             public void onScrubbed(Object value) {
                 if (value == null) {

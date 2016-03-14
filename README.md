@@ -5,18 +5,18 @@ Spark
 > general shape of the variation (typically over time) in some measurement, such as temperature or
 > stock market price, in a simple and highly condensed way.
 >
-> -- en.wikipedia.org
+> -- en.wikipedia.org/wiki/Sparkline
 
 ![](images/sample.png)
 
-Spark is a simple Android View that takes a series of x,y points of any scale and draws them as a
+Spark is a simple Android library that takes a series of x,y points at any scale and draws them as a
 sparkline chart.
 
 
 Usage
 -----
 
-Spark is setup with reasonable default values out of the box. Just add a `Sparkline` to your layout:
+Spark is setup with reasonable default values out of the box. Just add a `SparkView` to your layout:
 
 ```xml
 <LinearLayout
@@ -25,8 +25,8 @@ Spark is setup with reasonable default values out of the box. Just add a `Sparkl
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.robinhood.spark.Sparkline
-        android:id="@+id/sparkline"
+    <com.robinhood.spark.SparkView
+        android:id="@+id/sparkview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>
@@ -35,8 +35,8 @@ Spark is setup with reasonable default values out of the box. Just add a `Sparkl
 Then, just give it a `SparkAdapter` to graph your data
 
 ```java
-Sparkline sparkline = (Sparkline) findViewById(R.id.sparkline);
-sparkline.setAdapter(new MyAdapter(data));
+SparkView sparkView = (SparkView) findViewById(R.id.sparkview);
+sparkView.setAdapter(new MyAdapter(data));
 ...
 public class MyAdapter extends SparkAdapter {
     private float[] yData;
@@ -70,26 +70,26 @@ Spark is very theme-friendly! It has default styles set for you, and welcomes an
 
 In your `Activity`/`Fragment`/`View`:
 ```java
-sparkline.setLineColor(getColor(R.color.brand_color_primary));
+sparkView.setLineColor(getColor(R.color.brand_color_primary));
 ```
 
 In your layout xml:
 ```xml
-    <com.robinhood.spark.Sparkline
-        android:id="@+id/sparkline"
+    <com.robinhood.spark.SparkView
+        android:id="@+id/sparkview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:spark_lineColor="@color/brand_color_primary"/>
 ```
 
-Set a default style for all `Sparkline`s in your app's theme:
+Set a default style for all `SparkView`s in your app's theme:
 ```xml
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="spark_SparklineStyle">@style/MySparklineStyle</item>
+        <item name="spark_SparkViewStyle">@style/MySparkViewStyle</item>
     </style>
 
-    <style name="MySparklineStyle" parent="@style/spark_sparkline">
+    <style name="MySparkViewStyle" parent="@style/spark_sparkview">
         <item name="spark_lineColor">@color/line_color</item>
         <item name="spark_lineWidth">@dimen/line_width</item>
         <item name="spark_cornerRadius">@dimen/corner_radius</item>
@@ -115,18 +115,18 @@ to display additional detail information about the point the user is currently s
 
 Enable scrubbing via xml:
 ```xml
-<com.robinhood.spark.Sparkline
+<com.robinhood.spark.SparkView
     ...
     app:scrubEnabled="true" />
 ```
 
 or programatically:
 ```java
-sparkline.setScrubEnabled(true);
+sparkView.setScrubEnabled(true);
 ```
-and then add a `Sparkline.OnScrubListener` to get callbacks:
+and then add a `SparkView.OnScrubListener` to get callbacks:
 ```java
-sparkline.setScrubListener(new Sparkline.OnScrubListener() {
+sparkView.setScrubListener(new SparkView.OnScrubListener() {
         @Override
         public void onScrubbed(Object value) {
             scrubInfoTextView.setText(getString(R.string.scrub_format, value));
@@ -142,7 +142,19 @@ compared. Simply return this value from your `SparkAdapter`s `getBaseline()` met
 X Values
 --------
 Spark assumes that your graph's points are evenly distributed across the x-axis. If that's not true,
-just override `getX(int index)` in your `SparkAdapter` to give `Sparkline` the correct value.
+just override `getX(int index)` in your `SparkAdapter` to give `SparkView` the correct value.
+
+Animation
+---------
+To animate path changes, set `app:spark_animate="true"` or call `sparkView.setAnimate(true);`.
+
+Vision
+-------
+Spark is a very simple library and cannot possibly meet everyone's use-cases. A more robust charting
+library (such as [MP Android Chart](https://github.com/PhilJay/MPAndroidChart) may be a better fit
+if you're looking for things like axes or advanced touch gestures. Spark aims to be lightweight
+alternative for showing simple sparklines. Spark will prioritize simplicity over new use-cases the
+vast majority of the time.
 
 Download
 --------

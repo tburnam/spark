@@ -4,6 +4,6 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="spark_SparklineStyle">@style/spark_Sparkline</item>
+        <item name="spark_SparkViewStyle">@style/spark_SparkView</item>
     </style>
 </resources>
