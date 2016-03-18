@@ -132,7 +132,7 @@ public class SparkView extends View {
         scrubGestureDetector = new ScrubGestureDetector(context) {
             @Override
             public void onScrubbed(float x, float y) {
-                if (adapter == null) return;
+                if (adapter == null || adapter.getCount() == 0) return;
                 if (scrubListener != null) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                     int index = getNearestIndex(x);
@@ -616,6 +616,8 @@ public class SparkView extends View {
      * rect minus any padding.
      */
     private void updateContentRect() {
+        if (contentRect == null) return;
+
         contentRect.set(
                 getPaddingStart(),
                 getPaddingTop(),
