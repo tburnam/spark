@@ -89,8 +89,6 @@ public class ScrubGestureDetectorTest {
         final MotionEvent down = getMotionEvent(MotionEvent.ACTION_DOWN, 0, 0, 0, 0);
         final MotionEvent move = getMotionEvent(MotionEvent.ACTION_MOVE, scrubX, scrubY, moveTime,
                 downTime);
-        when(move.getHistoricalX(0)).thenReturn(0f);
-        when(move.getHistoricalY(0)).thenReturn(0f);
 
         assertTrue(scrubGestureDetector.onTouch(null, down));
         assertFalse(scrubGestureDetector.onTouch(null, move));

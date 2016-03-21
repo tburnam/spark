@@ -78,8 +78,8 @@ class ScrubGestureDetector implements View.OnTouchListener {
                     scrubListener.onScrubbed(x, y);
                 } else {
                     // if we moved before longpress, remove the callback if we exceeded the tap slop
-                    float deltaX = x - event.getHistoricalX(0);
-                    float deltaY = y - event.getHistoricalY(0);
+                    float deltaX = x - downX;
+                    float deltaY = y - downY;
                     if (deltaX >= touchSlop || deltaY >= touchSlop) {
                         handler.removeCallbacks(longPressRunnable);
                         // We got a MOVE event that exceeded tap slop but before the long-press
