@@ -28,9 +28,11 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.RectF;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +41,7 @@ import java.util.List;
 /**
  * A {@link SparkView} is a simplified line chart with no axes.
  */
-public class SparkView extends View {
+public class SparkView extends View implements ScrubGestureDetector.ScrubListener {
     // styleable values
     @ColorInt private int lineColor;
     private float lineWidth;
@@ -129,28 +131,9 @@ public class SparkView extends View {
         scrubLinePaint.setColor(baseLineColor);
         scrubLinePaint.setStrokeCap(Paint.Cap.ROUND);
 
-        scrubGestureDetector = new ScrubGestureDetector(context) {
-            @Override
-            public void onScrubbed(float x, float y) {
-                if (adapter == null || adapter.getCount() == 0) return;
-                if (scrubListener != null) {
-                    getParent().requestDisallowInterceptTouchEvent(true);
-                    int index = getNearestIndex(x);
-                    if (scrubListener != null) {
-                        scrubListener.onScrubbed(adapter.getItem(index));
-                    }
-                }
-
-                setScrubLine(x);
-            }
-
-            @Override
-            public void onScrubEnded() {
-                scrubLinePath.reset();
-                if (scrubListener != null) scrubListener.onScrubbed(null);
-                invalidate();
-            }
-        };
+        final Handler handler = new Handler();
+        final float touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        scrubGestureDetector = new ScrubGestureDetector(this, handler, touchSlop);
         scrubGestureDetector.setEnabled(scrubEnabled);
         setOnTouchListener(scrubGestureDetector);
     }
@@ -532,7 +515,7 @@ public class SparkView extends View {
     /**
      * Helper class for handling scaling logic.
      */
-    private static class ScaleHelper {
+    static class ScaleHelper {
         // the width and height of the view
         final float width, height;
         final int size;
@@ -629,8 +612,8 @@ public class SparkView extends View {
     /**
      * returns the nearest index (into {@link #adapter}'s data) for the given x coordinate.
      */
-    private int getNearestIndex(float x) {
-        int index = Collections.binarySearch(xPoints, x);
+    static int getNearestIndex(List<Float> points, float x) {
+        int index = Collections.binarySearch(points, x);
 
         // if binary search returns positive, we had an exact match, return that index
         if (index >= 0) return index;
@@ -642,17 +625,38 @@ public class SparkView extends View {
         if (index == 0) return index;
 
         // if we're inserting at the very end, then our guaranteed nearest index is the final one
-        if (index == xPoints.size()) return --index;
+        if (index == points.size()) return --index;
 
         // otherwise we need to check which of our two neighbors we're closer to
-        final float deltaUp = xPoints.get(index) - x;
-        final float deltaDown = x - xPoints.get(index - 1);
+        final float deltaUp = points.get(index) - x;
+        final float deltaDown = x - points.get(index - 1);
         if (deltaUp > deltaDown) {
             // if the below neighbor is closer, decrement our index
             index--;
         }
 
         return index;
+    }
+
+    @Override
+    public void onScrubbed(float x, float y) {
+        if (adapter == null || adapter.getCount() == 0) return;
+        if (scrubListener != null) {
+            getParent().requestDisallowInterceptTouchEvent(true);
+            int index = getNearestIndex(xPoints, x);
+            if (scrubListener != null) {
+                scrubListener.onScrubbed(adapter.getItem(index));
+            }
+        }
+
+        setScrubLine(x);
+    }
+
+    @Override
+    public void onScrubEnded() {
+        scrubLinePath.reset();
+        if (scrubListener != null) scrubListener.onScrubbed(null);
+        invalidate();
     }
 
     /**

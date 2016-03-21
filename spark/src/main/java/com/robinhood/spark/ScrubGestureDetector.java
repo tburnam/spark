@@ -16,33 +16,37 @@
 
 package com.robinhood.spark;
 
-import android.content.Context;
 import android.os.Handler;
-import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 
 /**
  * Exposes simple methods for detecting scrub events.
  */
-abstract class ScrubGestureDetector implements View.OnTouchListener {
-    private static final long LONG_PRESS_TIMEOUT_MS = 250;
+class ScrubGestureDetector implements View.OnTouchListener {
+    static final long LONG_PRESS_TIMEOUT_MS = 250;
 
-    private final Handler handler = new Handler();
-    private boolean enabled;
-    private long initialTouchTime;
-    private float downX, downY;
+    private final ScrubListener scrubListener;
     private final float touchSlop;
+    private final Handler handler;
 
-    public ScrubGestureDetector(Context context) {
-        touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+    private boolean enabled;
+    private float downX, downY;
+
+    public ScrubGestureDetector(ScrubListener scrubListener, Handler handler, float touchSlop) {
+        if (scrubListener == null || handler == null) {
+            throw new NullPointerException("Arguments cannot be null");
+        }
+        this.scrubListener = scrubListener;
+        this.handler = handler;
+        this.touchSlop = touchSlop;
     }
 
     private final Runnable longPressRunnable = new Runnable() {
         @Override
         public void run() {
-            onScrubbed(downX, downY);
+            scrubListener.onScrubbed(downX, downY);
         }
     };
 
@@ -59,7 +63,6 @@ abstract class ScrubGestureDetector implements View.OnTouchListener {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 // store the time to compute whether future events are 'long presses'
-                initialTouchTime = SystemClock.elapsedRealtime();
                 downX = x;
                 downY = y;
 
@@ -67,17 +70,17 @@ abstract class ScrubGestureDetector implements View.OnTouchListener {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 // calculate the elapsed time since the down event
-                float timeDelta = SystemClock.elapsedRealtime() - initialTouchTime;
+                float timeDelta = event.getEventTime() - event.getDownTime();
 
                 // if the user has intentionally long-pressed
-                if (timeDelta > LONG_PRESS_TIMEOUT_MS) {
+                if (timeDelta >= LONG_PRESS_TIMEOUT_MS) {
                     handler.removeCallbacks(longPressRunnable);
-                    onScrubbed(x, y);
+                    scrubListener.onScrubbed(x, y);
                 } else {
                     // if we moved before longpress, remove the callback if we exceeded the tap slop
-                    float deltaX = x - downX;
-                    float deltaY = y - downY;
-                    if (deltaX > touchSlop || deltaY > touchSlop) {
+                    float deltaX = x - event.getHistoricalX(0);
+                    float deltaY = y - event.getHistoricalY(0);
+                    if (deltaX >= touchSlop || deltaY >= touchSlop) {
                         handler.removeCallbacks(longPressRunnable);
                         // We got a MOVE event that exceeded tap slop but before the long-press
                         // threshold, we don't care about this series of events anymore.
@@ -89,14 +92,16 @@ abstract class ScrubGestureDetector implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 handler.removeCallbacks(longPressRunnable);
-                onScrubEnded();
+                scrubListener.onScrubEnded();
                 return true;
             default:
                 return false;
         }
     }
 
-    public abstract void onScrubbed(float x, float y);
-    public abstract void onScrubEnded();
+    interface ScrubListener {
+        void onScrubbed(float x, float y);
+        void onScrubEnded();
+    }
 }
 
