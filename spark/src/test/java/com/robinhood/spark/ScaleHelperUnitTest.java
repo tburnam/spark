@@ -23,7 +23,8 @@ public class ScaleHelperUnitTest {
     @Test
     public void testScaleTwoPoints() {
         testAdapter.setYData(new float[] {0, 1});
-        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0);
+        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0,
+                false);
 
         // assert point 0 is bottom left (0, 100)
         float x0 = scaleHelper.getX(testAdapter.getX(0));
@@ -41,7 +42,8 @@ public class ScaleHelperUnitTest {
     @Test
     public void testScaleThreePoints() {
         testAdapter.setYData(new float[] {0, 1, 0});
-        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0);
+        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0,
+                false);
 
         // assert point 0 is bottom left (0, 100)
         float x0 = scaleHelper.getX(testAdapter.getX(0));
@@ -67,7 +69,7 @@ public class ScaleHelperUnitTest {
         testAdapter.setYData(new float[] {0, 1});
         float lineWidth = 10;
         SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect,
-                lineWidth);
+                lineWidth, false);
 
         // point 0 should be bottom-left, but offset for the supplied line-width
         float x0 = scaleHelper.getX(testAdapter.getX(0));
@@ -86,7 +88,8 @@ public class ScaleHelperUnitTest {
     public void testNonuniformXPoints() {
         testAdapter.setYData(new float[] {0, 1, 2, 3, 4});
         testAdapter.setxData(new float[] {0, 1, 2, 3, 100});
-        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0);
+        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0,
+                false);
 
         // point 0 is bottom left
         float x0 = scaleHelper.getX(testAdapter.getX(0));
