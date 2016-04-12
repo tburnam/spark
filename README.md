@@ -117,7 +117,7 @@ Enable scrubbing via xml:
 ```xml
 <com.robinhood.spark.SparkView
     ...
-    app:scrubEnabled="true" />
+    app:spark_scrubEnabled="true" />
 ```
 
 or programatically:
