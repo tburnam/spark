@@ -32,7 +32,7 @@ Spark is setup with reasonable default values out of the box. Just add a `SparkV
 </LinearLayout>
 ```
 
-Then, just give it a `SparkAdapter` to graph your data
+Then, just give it a `SparkAdapter` to graph your data:
 
 ```java
 SparkView sparkView = (SparkView) findViewById(R.id.sparkview);
@@ -89,7 +89,7 @@ Set a default style for all `SparkView`s in your app's theme:
         <item name="spark_SparkViewStyle">@style/MySparkViewStyle</item>
     </style>
 
-    <style name="MySparkViewStyle" parent="@style/spark_sparkview">
+    <style name="MySparkViewStyle" parent="@style/spark_SparkView">
         <item name="spark_lineColor">@color/line_color</item>
         <item name="spark_lineWidth">@dimen/line_width</item>
         <item name="spark_cornerRadius">@dimen/corner_radius</item>
@@ -102,7 +102,7 @@ Set a default style for all `SparkView`s in your app's theme:
         <item name="spark_scrubLineWidth">@dimen/scrub_line_width</item>
         <item name="spark_scrubEnabled">true</item>
 
-        <item name="spark_animate">true</item>
+        <item name="spark_animateChanges">true</item>
     </style>
 </resources>
 
@@ -146,7 +146,7 @@ just override `getX(int index)` in your `SparkAdapter` to give `SparkView` the c
 
 Animation
 ---------
-To animate path changes, set `app:spark_animate="true"` or call `sparkView.setAnimate(true);`.
+To animate path changes, set `app:spark_animateChanges="true"` or call `sparkView.setAnimateChanges(true);`.
 
 Vision
 -------
