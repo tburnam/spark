@@ -540,16 +540,20 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             this.xStep = width / (size - 1);
 
             // get data bounds from adapter
-            Bounds bounds = adapter.getDataBounds();
+            RectF bounds = adapter.getDataBounds();
+            final float minX = bounds.left;
+            final float maxX = bounds.right;
+            final float minY = bounds.top;
+            final float maxY = bounds.bottom;
 
             // xScale will compress or expand the min and max x values to be just inside the view
-            this.xScale = width / (bounds.maxX - bounds.minX);
+            this.xScale = width / (maxX - minX);
             // xTranslation will move the x points back between 0 - width
-            this.xTranslation = leftPadding - (bounds.minX * xScale) + (lineWidthOffset / 2);
+            this.xTranslation = leftPadding - (minX * xScale) + (lineWidthOffset / 2);
             // yScale will compress or expand the min and max y values to be just inside the view
-            this.yScale = height / (bounds.maxY - bounds.minY);
+            this.yScale = height / (maxY - minY);
             // yTranslation will move the y points back between 0 - height
-            this.yTranslation = bounds.minY * yScale + topPadding + (lineWidthOffset / 2);
+            this.yTranslation = minY * yScale + topPadding + (lineWidthOffset / 2);
         }
 
         /**

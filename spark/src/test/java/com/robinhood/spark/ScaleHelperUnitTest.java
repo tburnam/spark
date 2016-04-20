@@ -6,8 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ScaleHelperUnitTest {
     private RectF contentRect;
@@ -16,7 +14,7 @@ public class ScaleHelperUnitTest {
     @Before
     public void setup() {
         // by default, all tests are on a canvas of 100 x 100
-        contentRect = getRectF(0, 0, 100, 100);
+        contentRect = TestAdapter.createMockRectF(0, 0, 100, 100);
         testAdapter = new TestAdapter();
     }
 
@@ -125,7 +123,8 @@ public class ScaleHelperUnitTest {
     @Test
     public void testNonWrappingDataBounds() {
         testAdapter.setYData(new float[] {0, 50, 100});
-        testAdapter.setDataBounds(new Bounds(0, 2, 0, 50));
+        // set bounds to 'zoon in' on the first two points
+        testAdapter.setDataBounds(0, 0, 1, 50);
         SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0,
                 false);
 
@@ -135,27 +134,16 @@ public class ScaleHelperUnitTest {
         assertEquals(0f, x0);
         assertEquals(100f, y0);
 
-        // assert point 1 is top middle (50, 0)
+        // assert point 1 is top right (100, 0)
         float x1 = scaleHelper.getX(testAdapter.getX(1));
         float y1 = scaleHelper.getY(testAdapter.getY(1));
-        assertEquals(50f, x1);
+        assertEquals(100f, x1);
         assertEquals(0f, y1);
 
-        // assert point 2 is outside our content rect, far top right (100, -100)
+        // assert point 2 is outside our content rect, far top right (200, -100)
         float x2 = scaleHelper.getX(testAdapter.getX(2));
         float y2 = scaleHelper.getY(testAdapter.getY(2));
-        assertEquals(100f, x2);
+        assertEquals(200f, x2);
         assertEquals(-100f, y2);
-    }
-
-    public static RectF getRectF(float left, float top, float right, float bottom) {
-        RectF rectF = mock(RectF.class);
-        rectF.left = left;
-        rectF.top = top;
-        rectF.right = right;
-        rectF.bottom = bottom;
-        when(rectF.width()).thenReturn(right - left);
-        when(rectF.height()).thenReturn(bottom - top);
-        return rectF;
     }
 }
