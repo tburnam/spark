@@ -539,30 +539,17 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             this.size = adapter.getCount();
             this.xStep = width / (size - 1);
 
-            // calculate min and max values
-            boolean hasBaseLine = adapter.hasBaseLine();
-            float minY = hasBaseLine ? adapter.getBaseLine() : Float.MAX_VALUE;
-            float maxY = hasBaseLine ? minY : Float.MIN_VALUE;
-            float minX = Float.MAX_VALUE;
-            float maxX = Float.MIN_VALUE;
-            for (int i = 0; i < size; i++) {
-                final float x = adapter.getX(i);
-                minX = Math.min(minX, x);
-                maxX = Math.max(maxX, x);
-
-                final float y = adapter.getY(i);
-                minY = Math.min(minY, y);
-                maxY = Math.max(maxY, y);
-            }
+            // get data bounds from adapter
+            Bounds bounds = adapter.getDataBounds();
 
             // xScale will compress or expand the min and max x values to be just inside the view
-            this.xScale = width / (maxX - minX);
+            this.xScale = width / (bounds.maxX - bounds.minX);
             // xTranslation will move the x points back between 0 - width
-            this.xTranslation = leftPadding - (minX * xScale) + (lineWidthOffset / 2);
+            this.xTranslation = leftPadding - (bounds.minX * xScale) + (lineWidthOffset / 2);
             // yScale will compress or expand the min and max y values to be just inside the view
-            this.yScale = height / (maxY - minY);
+            this.yScale = height / (bounds.maxY - bounds.minY);
             // yTranslation will move the y points back between 0 - height
-            this.yTranslation = minY * yScale + topPadding + (lineWidthOffset / 2);
+            this.yTranslation = bounds.minY * yScale + topPadding + (lineWidthOffset / 2);
         }
 
         /**

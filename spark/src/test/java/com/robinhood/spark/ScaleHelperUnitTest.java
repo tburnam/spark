@@ -87,7 +87,7 @@ public class ScaleHelperUnitTest {
     @Test
     public void testNonuniformXPoints() {
         testAdapter.setYData(new float[] {0, 1, 2, 3, 4});
-        testAdapter.setxData(new float[] {0, 1, 2, 3, 100});
+        testAdapter.setXData(new float[] {0, 1, 2, 3, 100});
         SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0,
                 false);
 
@@ -122,7 +122,33 @@ public class ScaleHelperUnitTest {
         assertEquals(0f, y4);
     }
 
-    private RectF getRectF(float left, float top, float right, float bottom) {
+    @Test
+    public void testNonWrappingDataBounds() {
+        testAdapter.setYData(new float[] {0, 50, 100});
+        testAdapter.setDataBounds(new Bounds(0, 2, 0, 50));
+        SparkView.ScaleHelper scaleHelper = new SparkView.ScaleHelper(testAdapter, contentRect, 0,
+                false);
+
+        // assert point 0 is bottom left (0, 100)
+        float x0 = scaleHelper.getX(testAdapter.getX(0));
+        float y0 = scaleHelper.getY(testAdapter.getY(0));
+        assertEquals(0f, x0);
+        assertEquals(100f, y0);
+
+        // assert point 1 is top middle (50, 0)
+        float x1 = scaleHelper.getX(testAdapter.getX(1));
+        float y1 = scaleHelper.getY(testAdapter.getY(1));
+        assertEquals(50f, x1);
+        assertEquals(0f, y1);
+
+        // assert point 2 is outside our content rect, far top right (100, -100)
+        float x2 = scaleHelper.getX(testAdapter.getX(2));
+        float y2 = scaleHelper.getY(testAdapter.getY(2));
+        assertEquals(100f, x2);
+        assertEquals(-100f, y2);
+    }
+
+    public static RectF getRectF(float left, float top, float right, float bottom) {
         RectF rectF = mock(RectF.class);
         rectF.left = left;
         rectF.top = top;
@@ -131,40 +157,5 @@ public class ScaleHelperUnitTest {
         when(rectF.width()).thenReturn(right - left);
         when(rectF.height()).thenReturn(bottom - top);
         return rectF;
-    }
-
-    private static class TestAdapter extends SparkAdapter {
-        private float[] yData, xData;
-        private boolean evenlyDistributeXPoints = true;
-
-        public void setYData(float[] yData) {
-            this.yData = yData;
-        }
-
-        public void setxData(float[] xData) {
-            this.xData = xData;
-        }
-
-        @Override
-        public int getCount() {
-            return yData.length;
-        }
-
-        @Override
-        public Object getItem(int index) {
-            return yData[index];
-        }
-
-        @Override
-        public float getY(int index) {
-            return yData[index];
-        }
-
-        @Override
-        public float getX(int index) {
-            return  xData == null
-                    ? super.getX(index)
-                    : xData[index];
-        }
     }
 }
