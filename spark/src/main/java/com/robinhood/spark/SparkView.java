@@ -539,21 +539,12 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             this.size = adapter.getCount();
             this.xStep = width / (size - 1);
 
-            // calculate min and max values
-            boolean hasBaseLine = adapter.hasBaseLine();
-            float minY = hasBaseLine ? adapter.getBaseLine() : Float.MAX_VALUE;
-            float maxY = hasBaseLine ? minY : Float.MIN_VALUE;
-            float minX = Float.MAX_VALUE;
-            float maxX = Float.MIN_VALUE;
-            for (int i = 0; i < size; i++) {
-                final float x = adapter.getX(i);
-                minX = Math.min(minX, x);
-                maxX = Math.max(maxX, x);
-
-                final float y = adapter.getY(i);
-                minY = Math.min(minY, y);
-                maxY = Math.max(maxY, y);
-            }
+            // get data bounds from adapter
+            RectF bounds = adapter.getDataBounds();
+            final float minX = bounds.left;
+            final float maxX = bounds.right;
+            final float minY = bounds.top;
+            final float maxY = bounds.bottom;
 
             // xScale will compress or expand the min and max x values to be just inside the view
             this.xScale = width / (maxX - minX);
