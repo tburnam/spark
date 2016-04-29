@@ -152,8 +152,16 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         if (adapter == null) return;
         if (getWidth() == 0 || getHeight() == 0) return;
 
+        final int adapterCount = adapter.getCount();
+
+        // to draw anything, we need 2 or more points
+        if (adapterCount < 2) {
+            clearData();
+            return;
+        }
+
         ScaleHelper scaleHelper = new ScaleHelper(adapter, contentRect, lineWidth, fill);
-        int adapterCount = adapter.getCount();
+
 
         // xPoints is only used in scrubbing, skip if disabled
         if (scrubEnabled) {
@@ -512,6 +520,13 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         pathAnimator.start();
     }
 
+    private void clearData() {
+        renderPath.reset();
+        sparkPath.reset();
+        baseLinePath.reset();
+        invalidate();
+    }
+
     /**
      * Helper class for handling scaling logic.
      */
@@ -676,10 +691,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         @Override
         public void onInvalidated() {
             super.onInvalidated();
-            renderPath.reset();
-            sparkPath.reset();
-            baseLinePath.reset();
-            invalidate();
+            clearData();
         }
     };
 }
