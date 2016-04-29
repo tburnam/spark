@@ -1,3 +1,5 @@
+![](images/sample.png)
+
 Spark
 ======
 
@@ -6,8 +8,6 @@ Spark
 > stock market price, in a simple and highly condensed way.
 >
 > -- en.wikipedia.org/wiki/Sparkline
-
-![](images/sample.png)
 
 Spark is a simple Android library that takes a series of x,y points at any scale and draws them as a
 sparkline chart.
