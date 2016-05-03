@@ -137,7 +137,8 @@ sparkView.setScrubListener(new SparkView.OnScrubListener() {
 Base Line
 ---------
 It's frequently useful to show a "base line" against which the rest of the sparkline chart will be
-compared. Simply return this value from your `SparkAdapter`s `getBaseline()` method.
+compared. In your `SparkAdapter`, override `hasBaseLine()` to return `true` and then return the
+appropriate base line value in `getBaseline()`.
 
 X Values
 --------
