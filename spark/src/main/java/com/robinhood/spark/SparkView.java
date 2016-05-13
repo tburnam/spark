@@ -31,6 +31,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewConfiguration;
 
@@ -42,6 +43,8 @@ import java.util.List;
  * A {@link SparkView} is a simplified line chart with no axes.
  */
 public class SparkView extends View implements ScrubGestureDetector.ScrubListener {
+    private static final String TAG = "Spark";
+
     // styleable values
     @ColorInt private int lineColor;
     private float lineWidth;
@@ -64,6 +67,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
     private SparkAdapter adapter;
 
     // misc fields
+    private ScaleHelper scaleHelper;
     private Paint sparkLinePaint;
     private Paint baseLinePaint;
     private Paint scrubLinePaint;
@@ -160,8 +164,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             return;
         }
 
-        ScaleHelper scaleHelper = new ScaleHelper(adapter, contentRect, lineWidth, fill);
-
+        scaleHelper = new ScaleHelper(adapter, contentRect, lineWidth, fill);
 
         // xPoints is only used in scrubbing, skip if disabled
         if (scrubEnabled) {
@@ -213,6 +216,38 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         renderPath.addPath(sparkPath);
 
         invalidate();
+    }
+
+    /**
+     * Get the scaled (pixel) coordinate of your given x value. If no scale is currently computed
+     * (for instance {@link SparkAdapter} has not been set or has < 2 points of data). This method
+     * will return the unscaled value.
+     *
+     * @param x    the value to scale (should be the same units as your graph's data points)
+     * @return the pixel coordinates of where this point is located in SparkView's bounds
+     */
+    public float getScaledX(float x) {
+        if (scaleHelper == null) {
+            Log.w(TAG, "getScaledX() - no scale available yet.");
+            return x;
+        }
+        return scaleHelper.getX(x);
+    }
+
+    /**
+     * Get the scaled (pixel) coordinate of your given y value. If no scale is currently computed
+     * (for instance {@link SparkAdapter} has not been set or has < 2 points of data). This method
+     * will return the unscaled value.
+     *
+     * @param y    the value to scale (should be the same units as your graph's data points)
+     * @return the pixel coordinates of where this point is located in SparkView's bounds
+     */
+    public float getScaledY(float y) {
+        if (scaleHelper == null) {
+            Log.w(TAG, "getScaledX() - no scale available yet.");
+            return y;
+        }
+        return scaleHelper.getY(y);
     }
 
     private void setScrubLine(float x) {
@@ -521,6 +556,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
     }
 
     private void clearData() {
+        scaleHelper = null;
         renderPath.reset();
         sparkPath.reset();
         baseLinePath.reset();
@@ -534,8 +570,6 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         // the width and height of the view
         final float width, height;
         final int size;
-        // the distance in pixels between each X value
-        final float xStep;
         // the scale factor for the Y values
         final float xScale, yScale;
         // translates the Y values back into the bounding rect after being scaled
@@ -552,7 +586,6 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             this.height = contentRect.height() - lineWidthOffset;
 
             this.size = adapter.getCount();
-            this.xStep = width / (size - 1);
 
             // get data bounds from adapter
             RectF bounds = adapter.getDataBounds();
