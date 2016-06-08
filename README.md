@@ -163,7 +163,7 @@ Download
 Gradle:
 
 ```groovy
-compile 'com.robinhood.spark:spark:1.1.0'
+compile 'com.robinhood.spark:spark:1.1.1'
 ```
 
 
