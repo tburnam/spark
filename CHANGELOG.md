@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.1.2 *(2016-07-18)*
+----------------------------
+* Fix: ScrubLine paint is now correctly initialized with `scrubLineWidth`
+* Fix: data sets with all the same value are now correctly displayed as a line
+
 Version 1.1.1 *(2016-06-08)*
 ----------------------------
 * New: minSdk is now 14 (Android 4.0, Ice Cream Sandwich)
