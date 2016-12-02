@@ -149,6 +149,27 @@ Animation
 ---------
 To animate path changes, set `app:spark_animateChanges="true"` or call `sparkView.setAnimateChanges(true);`.
 
+Data Boundaries
+---------------
+By default, Spark will calculate the min and max of your data set, and draw the sparkline as large as
+possible within the View boundaries. If you want different behavior, such as "zooming in" on a portion
+of your data, or "zooming out" to leave space between the sparkline and the side of the view, you
+can override `SparkAdapter.getDataBounds()`:
+
+```java
+public class MyAdapter extends SparkAdapter {
+    ...
+
+    @Override
+    public RectF getDataBounds() {
+        RectF bounds = super.getDataBounds();
+        // will 'zoom in' to the middle portion of the graph
+        bounds.inset(bounds.width() / 4, bounds.height() / 4);
+        return bounds;
+    }
+}
+```
+
 Vision
 -------
 Spark is a very simple library and cannot possibly meet everyone's use-cases. A more robust charting
