@@ -147,7 +147,8 @@ just override `getX(int index)` in your `SparkAdapter` to give `SparkView` the c
 
 Animation
 ---------
-To animate path changes, set `app:spark_animateChanges="true"` or call `sparkView.setAnimateChanges(true);`.
+To animate sparkline changes, set an animator with `sparkView.setSparkAnimator(sparkAnimator)`.
+There are two built-in animators: LineSparkAnimator (default) and MorphSparkAnimator. Pass your own implementation to achieve custom effects.
 
 Data Boundaries
 ---------------

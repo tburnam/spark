@@ -23,6 +23,7 @@
         <attr name="spark_scrubLineWidth" format="dimension|reference" />
 
         <attr name="spark_scrubEnabled" format="boolean|reference" />
+
         <attr name="spark_animateChanges" format="boolean|reference" />
     </declare-styleable>
 </resources>

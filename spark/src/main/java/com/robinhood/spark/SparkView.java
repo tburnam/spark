@@ -16,7 +16,11 @@
 
 package com.robinhood.spark;
 
-import android.animation.ValueAnimator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import android.animation.Animator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -25,7 +29,6 @@ import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.RectF;
 import android.os.Build;
 import android.os.Handler;
@@ -38,9 +41,8 @@ import android.view.ViewConfiguration;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.robinhood.spark.animation.LineSparkAnimator;
+import com.robinhood.spark.animation.SparkAnimator;
 import java.util.Locale;
 
 /**
@@ -94,7 +96,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
     @ColorInt private int scrubLineColor;
     private float scrubLineWidth;
     private boolean scrubEnabled;
-    private boolean animateChanges;
+    private SparkAnimator sparkAnimator;
 
     // the onDraw data
     private final Path renderPath = new Path();
@@ -112,11 +114,11 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
     private Paint scrubLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private OnScrubListener scrubListener;
     private ScrubGestureDetector scrubGestureDetector;
-    private List<Float> xPoints;
-    private ValueAnimator pathAnimator;
+    private Animator pathAnimator;
     private final RectF contentRect = new RectF();
 
-    private static int shortAnimationTime;
+    private List<Float> xPoints;
+    private List<Float> yPoints;
 
     public SparkView(Context context) {
         super(context);
@@ -159,7 +161,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         scrubEnabled = a.getBoolean(R.styleable.spark_SparkView_spark_scrubEnabled, true);
         scrubLineColor = a.getColor(R.styleable.spark_SparkView_spark_scrubLineColor, baseLineColor);
         scrubLineWidth = a.getDimension(R.styleable.spark_SparkView_spark_scrubLineWidth, lineWidth);
-        animateChanges = a.getBoolean(R.styleable.spark_SparkView_spark_animateChanges, false);
+        boolean animateChanges = a.getBoolean(R.styleable.spark_SparkView_spark_animateChanges, false);
         a.recycle();
 
         sparkLinePaint.setColor(lineColor);
@@ -183,6 +185,14 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         scrubGestureDetector = new ScrubGestureDetector(this, handler, touchSlop);
         scrubGestureDetector.setEnabled(scrubEnabled);
         setOnTouchListener(scrubGestureDetector);
+
+        xPoints = new ArrayList<>();
+        yPoints = new ArrayList<>();
+
+        // for backward support
+        if(animateChanges) {
+            sparkAnimator = new LineSparkAnimator();
+        }
     }
 
     @Override
@@ -209,14 +219,8 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
 
         scaleHelper = new ScaleHelper(adapter, contentRect, lineWidth, isFillInternal());
 
-        // xPoints is only used in scrubbing, skip if disabled
-        if (scrubEnabled) {
-            if (xPoints == null) {
-                xPoints = new ArrayList<>(adapterCount);
-            } else {
-                xPoints.clear();
-            }
-        }
+        xPoints.clear();
+        yPoints.clear();
 
         // make our main graph path
         sparkPath.reset();
@@ -224,15 +228,17 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             final float x = scaleHelper.getX(adapter.getX(i));
             final float y = scaleHelper.getY(adapter.getY(i));
 
+            // points to render graphic
+            // get points to animate
+            xPoints.add(x);
+            yPoints.add(y);
+
             if (i == 0) {
                 sparkPath.moveTo(x, y);
             } else {
                 sparkPath.lineTo(x, y);
             }
 
-            if (scrubEnabled) {
-                xPoints.add(x);
-            }
         }
 
         // if we're filling the graph in, close the path's circuit
@@ -319,6 +325,17 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         return new Path(sparkPath);
     }
 
+    /**
+     * Set the path to animate in onDraw, used for getAnimation purposes
+     */
+    public void setAnimationPath(final Path animationPath) {
+        this.renderPath.reset();
+        this.renderPath.addPath(animationPath);
+        this.renderPath.rLineTo(0, 0);
+
+        invalidate();
+    }
+
     private void setScrubLine(float x) {
         scrubLinePath.reset();
         scrubLinePath.moveTo(x, getPaddingTop());
@@ -395,17 +412,18 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
     }
 
     /**
-     * Whether or not this view animates changes to its data.
+     * Animator class to animate Spark
+     * @return a {@link SparkAnimator} or null
      */
-    public boolean getAnimateChanges() {
-        return animateChanges;
+    public SparkAnimator getSparkAnimator() {
+        return sparkAnimator;
     }
-
     /**
-     * Whether or not this view should animate changes to its data.
+     * Animator class to animate Spark
+     * @param sparkAnimator - a {@link SparkAnimator}
      */
-    public void setAnimateChanges(boolean animate) {
-        this.animateChanges = animate;
+    public void setSparkAnimator(SparkAnimator sparkAnimator) {
+        this.sparkAnimator = sparkAnimator;
     }
 
     /**
@@ -640,33 +658,42 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         populatePath();
     }
 
+    /**
+     * Returns a copy of current graphic X points
+     * @return current graphic X points
+     */
+    public List<Float> getXPoints() {
+        return new ArrayList<>(xPoints);
+    }
+
+    /**
+     * Returns a copy of current graphic Y points
+     * @return current graphic Y points
+     */
+    public List<Float> getYPoints() {
+        return new ArrayList<>(yPoints);
+    }
+
     private void doPathAnimation() {
         if (pathAnimator != null) {
             pathAnimator.cancel();
         }
 
-        if (shortAnimationTime == 0) {
-            shortAnimationTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        pathAnimator = getAnimator();
+
+        if(pathAnimator != null) {
+            pathAnimator.start();
         }
 
-        final PathMeasure pathMeasure = new PathMeasure(sparkPath, false);
+    }
 
-        float endLength = pathMeasure.getLength();
-        if (endLength == 0) return;
+    private Animator getAnimator() {
 
-        pathAnimator = ValueAnimator.ofFloat(0, endLength);
-        pathAnimator.setDuration(shortAnimationTime);
-        pathAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float animatedPathLength = (Float) animation.getAnimatedValue();
-                renderPath.reset();
-                pathMeasure.getSegment(0, animatedPathLength, renderPath, true);
-                renderPath.rLineTo(0, 0);
-                invalidate();
-            }
-        });
-        pathAnimator.start();
+        if(sparkAnimator != null) {
+            return sparkAnimator.getAnimation(this);
+        }
+
+        return null;
     }
 
     private void clearData() {
@@ -834,7 +861,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             super.onChanged();
             populatePath();
 
-            if (animateChanges) {
+            if (sparkAnimator != null) {
                 doPathAnimation();
             }
         }
@@ -846,4 +873,3 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         }
     };
 }
-
