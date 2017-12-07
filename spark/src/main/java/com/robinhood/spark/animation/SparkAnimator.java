@@ -10,8 +10,11 @@ import com.robinhood.spark.SparkView;
 public interface SparkAnimator {
 
     /**
-     * Returns an Animator that performs the desired animation. Must call {@link SparkView#setAnimationPath} for each animation frame.
+     * Returns an Animator that performs the desired animation. Must call
+     * {@link SparkView#setAnimationPath} for each animation frame.
+     *
      * See {@link LineSparkAnimator} and {@link MorphSparkAnimator} for examples.
+     *
      * @param sparkView The SparkView object
      */
     Animator getAnimation(final SparkView sparkView);

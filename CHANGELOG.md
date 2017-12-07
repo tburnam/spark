@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 1.2.0 *(2017-12-07)*
+----------------------------
+* New: Added extensible animator api. See README.md or `SparkView.setSparkAnimator()` for details.
+
 Version 1.1.2 *(2016-07-18)*
 ----------------------------
 * Fix: ScrubLine paint is now correctly initialized with `scrubLineWidth`
