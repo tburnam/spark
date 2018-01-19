@@ -347,10 +347,30 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
     }
 
     private void setScrubLine(float x) {
+        x = resolveBoundedScrubLine(x);
         scrubLinePath.reset();
         scrubLinePath.moveTo(x, getPaddingTop());
         scrubLinePath.lineTo(x, getHeight() - getPaddingBottom());
         invalidate();
+    }
+
+    /**
+     * Bounds the x coordinate of a scrub within the bounding rect minus padding and line width.
+     */
+    private float resolveBoundedScrubLine(float x) {
+        float scrubLineOffset = scrubLineWidth / 2;
+
+        float leftBound = getPaddingStart() + scrubLineOffset;
+        if (x < leftBound) {
+            return leftBound;
+        }
+
+        float rightBound = getWidth() - getPaddingEnd() - scrubLineOffset;
+        if (x > rightBound) {
+            return rightBound;
+        }
+
+        return x;
     }
 
     @Override
