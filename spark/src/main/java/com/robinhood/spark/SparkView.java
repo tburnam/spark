@@ -16,10 +16,6 @@
 
 package com.robinhood.spark;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import android.animation.Animator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -39,10 +35,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import com.robinhood.spark.animation.LineSparkAnimator;
 import com.robinhood.spark.animation.SparkAnimator;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -179,7 +179,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         sparkFillPaint.set(sparkLinePaint);
         sparkFillPaint.setColor(fillColor);
         sparkFillPaint.setStyle(Paint.Style.FILL);
-        sparkLinePaint.setStrokeWidth(0);
+        sparkFillPaint.setStrokeWidth(0);
 
         baseLinePaint.setStyle(Paint.Style.STROKE);
         baseLinePaint.setColor(baseLineColor);
