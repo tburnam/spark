@@ -357,8 +357,8 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
 
         this.renderPath.reset();
         this.renderPath.addPath(animationPath);
+//        this.renderPath.rLineTo(0, 0);
         this.renderPath.rLineTo(0, fillType == FillType.UP ? -getHeight() : fillY);
-
         if (fillType != FillType.NONE) {
             this.renderPath.lineTo(0, fillY);
         }

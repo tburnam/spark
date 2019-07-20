@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 switch(position) {
                     case 1:
                         LineSparkAnimator lineSparkAnimator = new LineSparkAnimator();
-                        lineSparkAnimator.setDuration(2500L);
+//                        lineSparkAnimator.setDuration(2500L);
                         lineSparkAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
                         sparkView.setSparkAnimator(lineSparkAnimator);
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         // set animator
                         MorphSparkAnimator morphSparkAnimator = new MorphSparkAnimator();
-                        morphSparkAnimator.setDuration(2000L);
+//                        morphSparkAnimator.setDuration(2000L);
                         morphSparkAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
                         sparkView.setSparkAnimator(morphSparkAnimator);
