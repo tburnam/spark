@@ -266,10 +266,9 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         final Float fillEdge = getFillEdge();
         if (fillEdge != null) {
             final float lastX = scaleHelper.getX(adapter.getX(adapter.getCount() - 1));
-            float fillY = getFillEdge() != null ? getFillEdge() : 0;
-            this.renderPath.rLineTo(0, fillType == FillType.UP ? -getHeight() : fillY);
             // line up or down to the fill edge
-//            sparkPath.lineTo(lastX, fillEdge);
+            sparkPath.lineTo(lastX + 20, getBottom());
+            sparkPath.lineTo(0, getBottom());
             // line straight left to far edge of the view
 //            sparkPath.lineTo(getPaddingStart(), fillEdge);
             // closes line back on the first point
