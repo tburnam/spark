@@ -271,7 +271,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
             // line straight left to far edge of the view
             sparkPath.lineTo(getPaddingStart(), fillEdge);
             // closes line back on the first point
-            sparkPath.close();
+//            sparkPath.close();
         }
 
         // make our base line path
@@ -404,6 +404,7 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
 
         canvas.drawPath(renderPath, sparkLinePaint);
         canvas.drawPath(scrubLinePath, scrubLinePaint);
+        canvas.drawText("hello", 500, 500, scrubLinePaint);
     }
 
     /**
