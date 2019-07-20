@@ -266,10 +266,12 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
         final Float fillEdge = getFillEdge();
         if (fillEdge != null) {
             final float lastX = scaleHelper.getX(adapter.getX(adapter.getCount() - 1));
+            float fillY = getFillEdge() != null ? getFillEdge() : 0;
+            this.renderPath.rLineTo(0, fillType == FillType.UP ? -getHeight() : fillY);
             // line up or down to the fill edge
-            sparkPath.lineTo(lastX, fillEdge);
+//            sparkPath.lineTo(lastX, fillEdge);
             // line straight left to far edge of the view
-            sparkPath.lineTo(getPaddingStart(), fillEdge);
+//            sparkPath.lineTo(getPaddingStart(), fillEdge);
             // closes line back on the first point
 //            sparkPath.close();
         }
@@ -352,10 +354,15 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
      * Set the path to animate in onDraw, used for getAnimation purposes
      */
     public void setAnimationPath(@NonNull Path animationPath) {
+        float fillY = getFillEdge() != null ? getFillEdge() : 0;
+
         this.renderPath.reset();
         this.renderPath.addPath(animationPath);
-        this.renderPath.rLineTo(0, 0);
+        this.renderPath.rLineTo(0, fillType == FillType.UP ? -getHeight() : fillY);
 
+        if (fillType != FillType.NONE) {
+            this.renderPath.lineTo(0, fillY);
+        }
         invalidate();
     }
 
@@ -404,7 +411,6 @@ public class SparkView extends View implements ScrubGestureDetector.ScrubListene
 
         canvas.drawPath(renderPath, sparkLinePaint);
         canvas.drawPath(scrubLinePath, scrubLinePaint);
-        canvas.drawText("hello", 500, 500, scrubLinePaint);
     }
 
     /**
